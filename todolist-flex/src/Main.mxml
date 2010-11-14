@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" 
+			   xmlns:services="services.*"
+			   minWidth="955" minHeight="600"
+			   creationComplete="reloadTasks()" 
+			   currentState="{channelSet.authenticated ? 'loggedIn' : 'loggedOut'}">
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			private var taskForm:TaskForm;
+			
+			[Bindable]
+			private var loggedInUser:String;
+			
+			private function reloadTasks():void {
+				getAllTasksResult.token = todoListService.getAllTasks();
+			}
+
+			protected function createTaskButton_clickHandler(event:MouseEvent):void {
+				taskForm = new TaskForm();
+				taskForm.addEventListener("taskSaved", taskSaved);
+				taskForm.addEventListener("taskCancelled", taskCancelled);
+				PopUpManager.addPopUp(taskForm, this, true);
+				PopUpManager.centerPopUp(taskForm);
+			}
+			
+			private function taskSaved(event:Event):void{
+				createTaskResult.token = todoListService.createNewTask(taskForm.task);
+			}
+			
+			private function taskCancelled(event:Event):void {
+				PopUpManager.removePopUp(taskForm);
+				taskForm = null;
+			}
+
+			protected function createTaskResult_resultHandler(event:ResultEvent):void {
+				PopUpManager.removePopUp(taskForm);
+				taskForm = null;
+				reloadTasks();
+			}
+
+			protected function loginButton_clickHandler(event:MouseEvent):void
+			{
+				loginResult.token = channelSet.login(usernameInput.text, passwordInput.text);
+			}
+
+			protected function logoutButton_clickHandler(event:MouseEvent):void
+			{
+				logoutResult.token = channelSet.logout();
+			}
+
+			protected function loginResult_resultHandler(event:ResultEvent):void
+			{
+				loggedInUser = event.result.name;
+				usernameInput.text = "";
+				passwordInput.text = "";
+			}
+
+			protected function logoutResult_resultHandler(event:ResultEvent):void
+			{
+				loggedInUser = "";
+			}
+		]]>
+	</fx:Script>
+	<s:states>
+		<s:State name="loggedOut"/>
+		<s:State name="loggedIn"/>
+	</s:states>
+	<fx:Declarations>
+		<s:CallResponder id="getAllTasksResult"/>
+		<s:CallResponder id="createTaskResult" 
+						 result="createTaskResult_resultHandler(event)"/>
+		<s:CallResponder id="loginResult" result="loginResult_resultHandler(event)" 
+						 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"/>
+		<s:CallResponder id="logoutResult" result="logoutResult_resultHandler(event)" 
+						 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"/>
+		<services:TodoListService id="todoListService" 
+			fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)" 
+			showBusyCursor="true">
+			<services:channelSet>
+				<s:ChannelSet id="channelSet">
+					<s:AMFChannel url="http://localhost:8080/todolist/messagebroker/amf"/>
+				</s:ChannelSet>
+			</services:channelSet>
+		</services:TodoListService>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:Panel width="100%" height="100%" title="Todo List">
+		<s:List width="100%" height="100%" id="list" labelField="title">
+			<s:AsyncListView list="{getAllTasksResult.lastResult}"/>
+		</s:List>
+		<s:controlBarContent>
+			<s:Button id="createTaskButton" label="+" 
+					  fontWeight="bold" fontSize="20"
+					  click="createTaskButton_clickHandler(event)"/>
+			<s:HGroup width="100%" horizontalAlign="right" includeIn="loggedOut">
+				<s:Label text="User name: "/>
+				<s:TextInput id="usernameInput"/>
+				<s:Label text="Password: "/>
+				<s:TextInput id="passwordInput" displayAsPassword="true"/>
+				<s:Button id="loginButton" label="Login" click="loginButton_clickHandler(event)"/>
+			</s:HGroup>
+			<s:HGroup width="100%" horizontalAlign="right" includeIn="loggedIn">
+				<s:Label text="Logged in as {loggedInUser}"/>
+				<s:Button id="logoutButton" label="Logout" click="logoutButton_clickHandler(event)"/>
+			</s:HGroup>
+		</s:controlBarContent>
+	</s:Panel>
+</s:Application>
