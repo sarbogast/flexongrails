@@ -1,100 +1,107 @@
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+    <!--
+    Smart developers always View Source.
+
+    This application was built using Adobe Flex, an open source framework
+    for building rich Internet applications that get delivered via the
+    Flash Player or to desktops via Adobe AIR.
+
+    Learn more about Flex at http://flex.org
+    // -->
     <head>
-        <title>Welcome to Grails</title>
-        <meta name="layout" content="main" />
+        <title>Todo List</title>
+        <meta name="google" value="notranslate">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<!-- Include CSS to eliminate any default margins/padding and set the height of the html element and
+		     the body element to 100%, because Firefox, or any Gecko based browser, interprets percentage as
+			 the percentage of the height of its parent container, which has to be set explicitly.  Fix for
+			 Firefox 3.6 focus border issues.  Initially, don't display flashContent div so it won't show
+			 if JavaScript disabled.
+		-->
         <style type="text/css" media="screen">
-
-        #nav {
-            margin-top:20px;
-            margin-left:30px;
-            width:228px;
-            float:left;
-
-        }
-        .homePagePanel * {
-            margin:0px;
-        }
-        .homePagePanel .panelBody ul {
-            list-style-type:none;
-            margin-bottom:10px;
-        }
-        .homePagePanel .panelBody h1 {
-            text-transform:uppercase;
-            font-size:1.1em;
-            margin-bottom:10px;
-        }
-        .homePagePanel .panelBody {
-            background: url(images/leftnav_midstretch.png) repeat-y top;
-            margin:0px;
-            padding:15px;
-        }
-        .homePagePanel .panelBtm {
-            background: url(images/leftnav_btm.png) no-repeat top;
-            height:20px;
-            margin:0px;
-        }
-
-        .homePagePanel .panelTop {
-            background: url(images/leftnav_top.png) no-repeat top;
-            height:11px;
-            margin:0px;
-        }
-        h2 {
-            margin-top:15px;
-            margin-bottom:15px;
-            font-size:1.2em;
-        }
-        #pageBody {
-            margin-left:280px;
-            margin-right:20px;
-        }
+			html, body	{ height:100%; }
+			body { margin:0; padding:0; overflow:auto; text-align:center;
+			       background-color: #ffffff; }
+			object:focus { outline:none; }
+			#flashContent { display:none; }
         </style>
+
+		<!-- Enable Browser History by replacing useBrowserHistory tokens with two hyphens -->
+        <!-- BEGIN Browser History required section -->
+        <link rel="stylesheet" type="text/css" href="history/history.css" />
+        <script type="text/javascript" src="history/history.js"></script>
+        <!-- END Browser History required section -->
+
+        <script type="text/javascript" src="swfobject.js"></script>
+        <script type="text/javascript">
+            <!-- For version detection, set to min. required Flash Player version, or 0 (or 0.0.0), for no version detection. -->
+            var swfVersionStr = "10.0.0";
+            <!-- To use express install, set to playerProductInstall.swf, otherwise the empty string. -->
+            var xiSwfUrlStr = "playerProductInstall.swf";
+            var flashvars = {ContextURL:"applicationcontext.xml"};
+            var params = {};
+            params.quality = "high";
+            params.bgcolor = "#ffffff";
+            params.allowscriptaccess = "sameDomain";
+            params.allowfullscreen = "true";
+            var attributes = {};
+            attributes.id = "Main";
+            attributes.name = "Main";
+            attributes.align = "middle";
+            swfobject.embedSWF(
+                "Main.swf", "flashContent",
+                "100%", "100%",
+                swfVersionStr, xiSwfUrlStr,
+                flashvars, params, attributes);
+			<!-- JavaScript enabled so display the flashContent div in case it is not replaced with a swf object. -->
+			swfobject.createCSS("#flashContent", "display:block;text-align:left;");
+        </script>
     </head>
     <body>
-        <div id="nav">
-            <div class="homePagePanel">
-                <div class="panelTop"></div>
-                <div class="panelBody">
-                    <h1>Application Status</h1>
-                    <ul>
-                        <li>App version: <g:meta name="app.version"></g:meta></li>
-                        <li>Grails version: <g:meta name="app.grails.version"></g:meta></li>
-                        <li>Groovy version: ${org.codehaus.groovy.runtime.InvokerHelper.getVersion()}</li>
-                        <li>JVM version: ${System.getProperty('java.version')}</li>
-                        <li>Controllers: ${grailsApplication.controllerClasses.size()}</li>
-                        <li>Domains: ${grailsApplication.domainClasses.size()}</li>
-                        <li>Services: ${grailsApplication.serviceClasses.size()}</li>
-                        <li>Tag Libraries: ${grailsApplication.tagLibClasses.size()}</li>
-                    </ul>
-                    <h1>Installed Plugins</h1>
-                    <ul>
-                        <g:set var="pluginManager"
-                               value="${applicationContext.getBean('pluginManager')}"></g:set>
-
-                        <g:each var="plugin" in="${pluginManager.allPlugins}">
-                            <li>${plugin.name} - ${plugin.version}</li>
-                        </g:each>
-
-                    </ul>
-                </div>
-                <div class="panelBtm"></div>
-            </div>
+        <!-- SWFObject's dynamic embed method replaces this alternative HTML content with Flash content when enough
+			 JavaScript and Flash plug-in support is available. The div is initially hidden so that it doesn't show
+			 when JavaScript is disabled.
+		-->
+        <div id="flashContent">
+        	<p>
+	        	To view this page ensure that Adobe Flash Player version
+				10.0.0 or greater is installed.
+			</p>
+			<script type="text/javascript">
+				var pageHost = ((document.location.protocol == "https:") ? "https://" :	"http://");
+				document.write("<a href='http://www.adobe.com/go/getflashplayer'><img src='"
+								+ pageHost + "www.adobe.com/images/shared/download_buttons/get_flash_player.gif' alt='Get Adobe Flash player' /></a>" );
+			</script>
         </div>
-        <div id="pageBody">
-            <h1>Welcome to Grails</h1>
-            <p>Congratulations, you have successfully started your first Grails application! At the moment
-            this is the default page, feel free to modify it to either redirect to a controller or display whatever
-            content you may choose. Below is a list of controllers that are currently deployed in this application,
-            click on each to execute its default action:</p>
 
-            <div id="controllerList" class="dialog">
-                <h2>Available Controllers:</h2>
-                <ul>
-                    <g:each var="c" in="${grailsApplication.controllerClasses.sort { it.fullName } }">
-                        <li class="controller"><g:link controller="${c.logicalPropertyName}">${c.fullName}</g:link></li>
-                    </g:each>
-                </ul>
-            </div>
-        </div>
-    </body>
+       	<noscript>
+            <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="100%" height="100%" id="Main">
+                <param name="FlashVars" value="ContextURL=applicationcontext.xml" />
+                <param name="movie" value="Main.swf" />
+                <param name="quality" value="high" />
+                <param name="bgcolor" value="#ffffff" />
+                <param name="allowScriptAccess" value="sameDomain" />
+                <param name="allowFullScreen" value="true" />
+                <!--[if !IE]>-->
+                <object type="application/x-shockwave-flash" data="Main.swf" width="100%" height="100%">
+                    <param name="quality" value="high" />
+                    <param name="bgcolor" value="#ffffff" />
+                    <param name="allowScriptAccess" value="sameDomain" />
+                    <param name="allowFullScreen" value="true" />
+                <!--<![endif]-->
+                <!--[if gte IE 6]>-->
+                	<p>
+                		Either scripts and active content are not permitted to run or Adobe Flash Player version
+                		10.0.0 or greater is not installed.
+                	</p>
+                <!--<![endif]-->
+                    <a href="http://www.adobe.com/go/getflashplayer">
+                        <img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash Player" />
+                    </a>
+                <!--[if !IE]>-->
+                </object>
+                <!--<![endif]-->
+            </object>
+	    </noscript>
+   </body>
 </html>

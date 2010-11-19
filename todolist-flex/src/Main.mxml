@@ -4,19 +4,29 @@
 			   xmlns:mx="library://ns.adobe.com/flex/mx" 
 			   xmlns:services="services.*"
 			   minWidth="955" minHeight="600"
-			   creationComplete="reloadTasks()" 
-			   currentState="{channelSet.authenticated ? 'loggedIn' : 'loggedOut'}">
+			   currentState="{channelSet != null ? (channelSet.authenticated ? 'loggedIn' : 'loggedOut') : 'loggedOut'}"
+			   preinitialize="preinitializeHandler(event)"
+			   applicationComplete="applicationCompleteHandler(event)">
 	<fx:Script>
 		<![CDATA[
 			import mx.controls.Alert;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
+			import mx.messaging.ChannelSet;
+			import mx.rpc.events.FaultEvent;
 			import mx.rpc.events.ResultEvent;
+			
+			import org.springextensions.actionscript.context.support.XMLApplicationContext;
 			
 			private var taskForm:TaskForm;
 			
 			[Bindable]
 			private var loggedInUser:String;
+			
+			[Bindable]
+			private var channelSet:ChannelSet;
+			
+			private var contextURL:String;
 			
 			private function reloadTasks():void {
 				getAllTasksResult.token = todoListService.getAllTasks();
@@ -47,12 +57,20 @@
 
 			protected function loginButton_clickHandler(event:MouseEvent):void
 			{
-				loginResult.token = channelSet.login(usernameInput.text, passwordInput.text);
+				if(channelSet == null){
+					Alert.show("You are not connected to the server so you can't log in");
+				} else {
+					loginResult.token = channelSet.login(usernameInput.text, passwordInput.text);
+				}
 			}
 
 			protected function logoutButton_clickHandler(event:MouseEvent):void
 			{
-				logoutResult.token = channelSet.logout();
+				if(channelSet == null){
+					Alert.show("You are not connected to the server so you can't log out");
+				} else {
+					logoutResult.token = channelSet.logout();
+				}
 			}
 
 			protected function loginResult_resultHandler(event:ResultEvent):void
@@ -66,6 +84,32 @@
 			{
 				loggedInUser = "";
 			}
+
+			protected function preinitializeHandler(event:FlexEvent):void
+			{
+				contextURL = parameters['ContextURL'];
+			}
+
+
+			protected function applicationCompleteHandler(event:FlexEvent):void
+			{
+				var applicationContext:XMLApplicationContext = new XMLApplicationContext();
+				applicationContext.addConfigLocation(contextURL);
+				applicationContext.addEventListener(Event.COMPLETE, contextLoadedHandler);
+				applicationContext.load();
+			}
+			
+			protected function contextLoadedHandler(event:Event):void{
+				channelSet = (event.target as XMLApplicationContext).getObject("channelSet");
+				reloadTasks();
+			}
+
+
+			protected function getAllTasksResult_faultHandler(event:FaultEvent):void
+			{
+				Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)
+			}
+
 		]]>
 	</fx:Script>
 	<s:states>
@@ -73,7 +117,7 @@
 		<s:State name="loggedIn"/>
 	</s:states>
 	<fx:Declarations>
-		<s:CallResponder id="getAllTasksResult"/>
+		<s:CallResponder id="getAllTasksResult" fault="getAllTasksResult_faultHandler(event)"/>
 		<s:CallResponder id="createTaskResult" 
 						 result="createTaskResult_resultHandler(event)"/>
 		<s:CallResponder id="loginResult" result="loginResult_resultHandler(event)" 
@@ -82,12 +126,7 @@
 						 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"/>
 		<services:TodoListService id="todoListService" 
 			fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)" 
-			showBusyCursor="true">
-			<services:channelSet>
-				<s:ChannelSet id="channelSet">
-					<s:AMFChannel url="http://localhost:8080/todolist/messagebroker/amf"/>
-				</s:ChannelSet>
-			</services:channelSet>
+			showBusyCursor="true" channelSet="{channelSet}">
 		</services:TodoListService>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
